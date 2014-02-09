@@ -10,9 +10,14 @@ function stage_mouse_down (event) {
 }
 
 function stage_welcome_mouse_down(event){
+  wrap_cylinder_container = new createjs.Container();
+  wrap_cylinder_container.name = "wrap_cylinder_container";
+  /*stage.addChild(wrap_cylinder_container);*/
+
+  /*build_green_box();*/
   stage.options.stage = "playing";
-  createjs.Ticker.addEventListener("tick", tick_flappy_rest);
-  
+  createjs.Ticker.addEventListener("tick", ticker_flapply_playing);
+
   stage_playing_mouse_down(event);
 
   createjs.Tween.get(welcome_container).to({alpha:0}, 900,createjs.Ease.sineIn ).call(function(){
@@ -31,11 +36,14 @@ function stage_playing_mouse_down (event) {
   
 }
 
-
+var bird_number_ticker = 0;
+var general_number_ticker = 0;
 function tick(event) {
   var stage_name = stage.options.stage;
+  general_number_ticker++;
+
   if (stage.getChildByName('ground') != null && stage_name !='gameover'){
-    ground.delay_x  +=0.5; 
+    ground.delay_x  +=0.2; 
     if (ground.delay_x ==1){
       ground.delay_x = 0;
     }
@@ -43,9 +51,9 @@ function tick(event) {
   }
 
   if (stage.getChildByName('flappy_bird') != null && stage_name != 'gameover'){
-    flappy_bird.start_timer++;
+    bird_number_ticker++;
 
-      if (flappy_bird.start_timer % 2 ==0){
+      if (bird_number_ticker % 2 ==0){
         if (flappy_bird.fly_welcome.is_up){
           flappy_bird.fly_welcome.value++;
           if (flappy_bird.fly_welcome.value > 15){
@@ -66,7 +74,7 @@ function tick(event) {
         flappy_bird.y = flappy_bird.options.origin_y + extra_y;
         
       }
-      switch (flappy_bird.start_timer){
+      switch (bird_number_ticker){
         case 10:
           flappy_bird.gotoAndStop(0); 
           break;
@@ -76,7 +84,7 @@ function tick(event) {
           break;
         case 30:
           flappy_bird.gotoAndStop(2); 
-          flappy_bird.start_timer = 1;
+          bird_number_ticker = 1;
           break;
       }
   }
@@ -84,25 +92,47 @@ function tick(event) {
 }
 
 
-function tick_flappy_rest (event) {
-  switch (stage.options.stage){
-    case 'playing':
-      playing_tick(event);
-      break;
+
+function ticker_flapply_playing (event) {
+  log("playing_tick");
+  //Move box
+  var wrap_cylinder_container = stage.getChildByName('wrap_cylinder_container');
+
+  if (wrap_cylinder_container){
+    for ( var i=0; i < wrap_cylinder_container.getNumChildren(); i++ ){
+      var vertical_cylinder_container = wrap_cylinder_container.getChildAt(i);
+      vertical_cylinder_container.current_x -= 1.5;
+      var top_cylinder = vertical_cylinder_container.getChildAt(0);
+      top_cylinder.x = Math.round(vertical_cylinder_container.current_x);
+      vertical_cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
+
+      var bottom_cylinder = vertical_cylinder_container.getChildAt(1);
+      bottom_cylinder.x =  Math.round(vertical_cylinder_container.current_x);
+      vertical_cylinder_container.child_offset.bottom = build_point_param(bottom_cylinder.x,bottom_cylinder.y,bottom_cylinder.end_y);
+
+      if (! vertical_cylinder_container.bird_passed){
+        if ( flappy_bird.x - half_bird_width > vertical_cylinder_container.child_offset.top.top_right.x ){
+          vertical_cylinder_container.bird_passed = true;
+          //play passed sound
+          createjs.Sound.play("point");
+          score_text.value++;
+          score_text.text = score_text.value;
+        }
+        check_game_over(vertical_cylinder_container.child_offset);
+      }
+    }
   }
 
-  stage.update();
-}
-
-function playing_tick (event) {
-  var ground_y = ground.y -10;
+  if (general_number_ticker % 100 == 0){
+    build_green_box();
+  }
+  
 
   if (flappy_bird.options.status == 'rest' ){
-    log("take down");
     /*flappy_bird.options.status = 'is_down';*/
     var next_y = flappy_bird.y + 3;
     
-    next_y = (next_y > ground_y) ? ground_y: next_y;
+    next_y = (next_y > edge_ground_y) ? edge_ground_y: next_y;
     flappy_bird.y = next_y;
 
     var next_rotation = flappy_bird.rotation + 3;
@@ -125,20 +155,90 @@ function playing_tick (event) {
   }
 
 
-  if (flappy_bird.y == ground_y){
+  if (flappy_bird.y == edge_ground_y){
     log('gameover');
     stage.options.stage = 'gameover';
 
     //Set ground is front of flappy_bird
     stage.addChild(ground);
-    createjs.Ticker.removeEventListener("tick", tick_flappy_rest);
+    createjs.Ticker.removeEventListener("tick", ticker_flapply_playing);
 
     stage.removeChild(score_text);
 
     createjs.Sound.play("hit");
 
     setTimeout(function(){
-      createjs.Sound.play("swooshing");
+      show_gameOver_board();
     },300);
   }
+}
+
+function check_game_over(child_offset){
+  var edge_x = flappy_bird.x;
+  var edge_y = flappy_bird.y;
+  
+
+  var list_edges = [
+    {
+      x:flappy_bird.x - half_bird_width,
+      y:flappy_bird.y - half_bird_height
+    },
+    {
+      x:flappy_bird.x + half_bird_width,
+      y:flappy_bird.y -half_bird_height
+    },
+    {
+      x:flappy_bird.x - half_bird_width,
+      y:flappy_bird.y + half_bird_height
+    },
+    {
+      x:flappy_bird.x + half_bird_width,
+      y:flappy_bird.y + half_bird_height
+    }
+  ];
+
+  for (var i=0; i < list_edges.length; i++){
+    var edge_x = list_edges[i].x;
+    var edge_y = list_edges[i].y;
+
+    if (edge_x > child_offset.top.top_left.x && edge_x < child_offset.top.top_right.x ){
+      if (edge_y < child_offset.top.bottom_left.y || edge_y > child_offset.bottom.top_left.y ){
+        createjs.Sound.play("hit");
+        stage.addChild(flappy_bird);
+        stage.options.stage = 'gameover';
+        createjs.Ticker.removeEventListener("tick", ticker_flapply_playing);
+        createjs.Tween.get(flappy_bird).to({y:edge_ground_y, rotation:90}, 500,createjs.Ease.sineIn ).call(function(){
+          stage.addChild(ground);
+          setTimeout(function(){
+            show_gameOver_board();
+          },500);
+          
+        });
+        
+      }
+    }
+  }
+}
+
+function show_gameOver_board(){
+  log("show game over board");
+  createjs.Sound.play("swooshing");
+  var gameOver_container = new createjs.Container();
+  gameOver_container.name = "gameOver_container";
+  stage.addChild(gameOver_container);
+
+  //Init ready text
+
+  var gameOver_title_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
+  gameOver_title_bit.sourceRect = new createjs.Rectangle(788,114,gameOver_title_size.width, gameOver_title_size.height);
+  gameOver_title_bit.x = Math.round((game_size.width - gameOver_title_size.width)/2);
+  gameOver_title_bit.y = 100;
+  gameOver_title_bit.alpha = 1;
+  
+  gameOver_container.addChild(gameOver_title_bit);
+  stage.update();
+  createjs.Tween.get(gameOver_title_bit).to({alpha:1,y:gameOver_title_bit.y-5}, 300,createjs.Ease.sineIn ).call(function(){
+    //Do stuff  
+    log("next");
+  });
 }
