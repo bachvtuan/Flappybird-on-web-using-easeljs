@@ -17,7 +17,7 @@ body{
 .wrap_game{
   width: 390px;
   height: 520px;
-  margin: 0px auto 10px auto;
+  margin: 10px auto 10px auto;
 }
 
 a{
@@ -25,5 +25,9 @@ a{
   text-align: center;
   margin: 10px auto 0px auto;
   display: block;
+  -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+  -moz-user-select: none; /* mozilla browsers */
+  -khtml-user-select: none; /* webkit (konqueror) browsers */
+  -ms-user-select: none; /* IE10+ */
 }
   
