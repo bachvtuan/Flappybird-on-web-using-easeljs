@@ -17,8 +17,13 @@ body{
 .wrap_game{
   width: 390px;
   height: 520px;
-  margin: 20px auto 0px auto;
+  margin: 0px auto 10px auto;
 }
 
-
+a{
+  color: #fff;
+  text-align: center;
+  margin: 10px auto 0px auto;
+  display: block;
+}
   
