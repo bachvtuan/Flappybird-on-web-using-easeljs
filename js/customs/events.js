@@ -233,12 +233,55 @@ function show_gameOver_board(){
   gameOver_title_bit.sourceRect = new createjs.Rectangle(788,114,gameOver_title_size.width, gameOver_title_size.height);
   gameOver_title_bit.x = Math.round((game_size.width - gameOver_title_size.width)/2);
   gameOver_title_bit.y = 100;
-  gameOver_title_bit.alpha = 1;
+  gameOver_title_bit.alpha = 0;
   
   gameOver_container.addChild(gameOver_title_bit);
-  stage.update();
+  
   createjs.Tween.get(gameOver_title_bit).to({alpha:1,y:gameOver_title_bit.y-5}, 300,createjs.Ease.sineIn ).call(function(){
     //Do stuff  
-    log("next");
+    
+    createjs.Sound.play("swooshing");
+    var medal_board_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
+    medal_board_bit.sourceRect = new createjs.Rectangle(5,516,medal_board_size.width, medal_board_size.height);
+    medal_board_bit.x = Math.round((game_size.width - medal_board_size.width)/2);
+    medal_board_bit.y = game_size.height;
+    gameOver_container.addChild(medal_board_bit);
+    createjs.Tween.get(medal_board_bit).to({y:180}, 300,createjs.Ease.backInOut  ).call(function(){
+
+      current_score_text = new createjs.Text(score_text.value, "bold 20px Sanidana", "#fff");
+      current_score_text.value = 0;
+      current_score_text.name = 'current_score_text';
+      current_score_text.x =  medal_board_bit.x + 205 - current_score_text.getMeasuredWidth();
+      current_score_text.y =  215;
+      current_score_text.shadow = new createjs.Shadow("#000000", 0,0, 5);
+      
+      gameOver_container.addChild(current_score_text);
+
+      best_score_text = new createjs.Text(50, "bold 20px Sanidana", "#fff");
+      best_score_text.value = 0;
+      best_score_text.name = 'best_score_text';
+      best_score_text.x =  medal_board_bit.x + 205 - best_score_text.getMeasuredWidth()
+      best_score_text.y =  260;
+      best_score_text.shadow = new createjs.Shadow("#000000", 0,0, 5);
+      
+      gameOver_container.addChild(best_score_text);
+
+      if (score_text.value > 10 || 1==1){
+        var medal_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
+        var selected_medal_offset = score_text.value > 20 ? platium_medal_offset : gold_medal_offset;
+        selected_medal_offset = platium_medal_offset;
+        medal_bit.sourceRect = new createjs.Rectangle(selected_medal_offset.x,selected_medal_offset.y,
+        medal_size.width, medal_size.height);
+        medal_bit.x = medal_board_bit.x + 27;
+        medal_bit.y = medal_board_bit.y +43;
+        
+        gameOver_container.addChild(medal_bit);
+      }
+      
+      
+
+
+    });
   });
 }
+

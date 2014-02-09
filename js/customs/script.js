@@ -6,6 +6,12 @@ var house_size = {width:287,height:515};
 var tip_size = {width:114,height:107};
 var ready_size = {width:194,height:54};
 var gameOver_title_size = {width:200,height:50};
+var medal_board_size = {width:226,height:118};
+
+var medal_size = {width:44,height:44};
+var gold_medal_offset = {x:242,y:564};
+var platium_medal_offset = {x:242,y:516};
+
 var cylinder_size = {width:52,height:320};
 var bird_size = {width:34, height:24};
 
