@@ -1,7 +1,7 @@
 Flappybird-on-web-using-easeljs
 ===============================
 
-This game is my working for 36 hours in weekend time, it's written by HTML5 which is ported from Flappybird on mobile.  
+This game is my working for 48 hours in weekend time, it's written by HTML5 which is ported from Flappybird on mobile.  
 I'll not solve any responsibility for any claim about legal also copyright for this porting because this game is not for business purpose. Thank !  
 Resources
 ==
