@@ -12,3 +12,11 @@ function create_bg(color){
 function random(min,max){
   return Math.floor((Math.random()*max)+min);
 }
+
+function get_best_score(){
+  var best_score = getLocal(best_score_key);
+  return  best_score === null  ?  0 : best_score;
+}
+function set_best_score(score){
+  setLocal(best_score_key,score);
+}

@@ -1,5 +1,7 @@
 var stage,canvas,loader,ground, flappy_bird =null,score_text, wrap_cylinder_container;
-var welcome_container = new createjs.Container();
+var welcome_container;
+
+var best_score_key = "best_score";
 
 var game_size = {width:390, height:520};
 var house_size = {width:287,height:515};
@@ -8,6 +10,9 @@ var ready_size = {width:194,height:54};
 var gameOver_title_size = {width:200,height:50};
 var medal_board_size = {width:226,height:118};
 
+var play_button_size = {width:114,height:60};
+var play_button_offset = {x:700,y:236};
+
 var medal_size = {width:44,height:44};
 var gold_medal_offset = {x:242,y:564};
 var platium_medal_offset = {x:242,y:516};
@@ -15,9 +20,15 @@ var platium_medal_offset = {x:242,y:516};
 var cylinder_size = {width:52,height:320};
 var bird_size = {width:34, height:24};
 
+var new_best_score_size = {width:32,height:14};
+var new_best_score_offset = {x:224,y:1003};
+
 var half_bird_width = Math.round((bird_size.width-3)/2);
 var half_bird_height = Math.round((bird_size.height-2)/2);
 var edge_ground_y;
+
+var bird_number_ticker = 0;
+var general_number_ticker = 0;
 
 function init () {
   canvas = document.getElementById("game");
@@ -28,8 +39,6 @@ function init () {
   stage.options = {stage:'init'};
   stage.enableMouseOver(20);  
   
-  stage.addChild(welcome_container);
-
   createjs.Ticker.setInterval(10);
   createjs.Ticker.addEventListener("tick", tick);
   
@@ -50,18 +59,21 @@ function init () {
   init_black_bg();
   loader = new createjs.LoadQueue(true);
   loader.installPlugin(createjs.Sound);
-  loader.addEventListener("complete", init_sprite_sheet);
+  loader.addEventListener("complete", move_to_ready_stage);
   loader.loadManifest(manifest);
   
   stage.update();
 }
 
-function init_sprite_sheet(){
+function move_to_ready_stage(){
   
   stage.removeChild(stage.getChildByName('author_text'));
   stage.removeChild(stage.getChildByName('loading_text'));
   stage.removeChild(stage.getChildByName('author_text'));
-  
+  ready_stage();
+}
+function ready_stage(){
+
   /*
   1:bright
   2:dark
@@ -84,6 +96,10 @@ function init_sprite_sheet(){
   house_bit.scaleX= game_size.width / house_size.width;
   house_bit.scaleY= game_size.height / house_size.height;
   stage.addChild(house_bit);
+
+
+  welcome_container = new createjs.Container();
+  stage.addChild(welcome_container);
 
   //init tip
   var tip_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
@@ -206,12 +222,11 @@ function init_black_bg(){
   
 }
 
-function build_green_box(){
+function build_green_cylinder(){
 
   var start_x = 400;
-  var random_y = -random(50,200);
+  var random_y = -random(70,200);
 
-  log(random_y);
 
   var vertical_cylinder_container = new createjs.Container();
   vertical_cylinder_container.bird_passed = false;
@@ -231,8 +246,8 @@ function build_green_box(){
 
 
   var bottom_cylinder = new createjs.Bitmap(loader.getResult("main_sprite"));
-  //The height of space between 2 cylinder = 100px
-  var start_bottom_cylinder_y = top_cylinder.end_y+ 100;
+  //The height of space between 2 cylinder = 105px
+  var start_bottom_cylinder_y = top_cylinder.end_y+ 105;
   bottom_cylinder.name = "bottom_cylinder";
   bottom_cylinder.sourceRect = new createjs.Rectangle(168,645,cylinder_size.width, cylinder_size.height);
   bottom_cylinder.x = vertical_cylinder_container.current_x;
@@ -242,7 +257,6 @@ function build_green_box(){
 
   vertical_cylinder_container.child_offset.bottom = build_point_param(start_x,start_bottom_cylinder_y,bottom_cylinder.end_y);
 
-  log(vertical_cylinder_container.child_offset);
   /*stage.addChild(vertical_cylinder_container);*/
   wrap_cylinder_container.addChild(vertical_cylinder_container);
 

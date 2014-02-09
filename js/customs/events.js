@@ -14,7 +14,6 @@ function stage_welcome_mouse_down(event){
   wrap_cylinder_container.name = "wrap_cylinder_container";
   /*stage.addChild(wrap_cylinder_container);*/
 
-  /*build_green_box();*/
   stage.options.stage = "playing";
   createjs.Ticker.addEventListener("tick", ticker_flapply_playing);
 
@@ -36,8 +35,7 @@ function stage_playing_mouse_down (event) {
   
 }
 
-var bird_number_ticker = 0;
-var general_number_ticker = 0;
+
 function tick(event) {
   var stage_name = stage.options.stage;
   general_number_ticker++;
@@ -92,39 +90,47 @@ function tick(event) {
 }
 
 
-
 function ticker_flapply_playing (event) {
-  log("playing_tick");
-  //Move box
+  
   var wrap_cylinder_container = stage.getChildByName('wrap_cylinder_container');
 
-  if (wrap_cylinder_container){
-    for ( var i=0; i < wrap_cylinder_container.getNumChildren(); i++ ){
-      var vertical_cylinder_container = wrap_cylinder_container.getChildAt(i);
-      vertical_cylinder_container.current_x -= 1.5;
-      var top_cylinder = vertical_cylinder_container.getChildAt(0);
-      top_cylinder.x = Math.round(vertical_cylinder_container.current_x);
-      vertical_cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
+  if (wrap_cylinder_container && wrap_cylinder_container.getNumChildren() >0){
+    for ( var i=wrap_cylinder_container.getNumChildren()-1; i >0; i-- ){
+      var cylinder_container = wrap_cylinder_container.getChildAt(i);
 
-      var bottom_cylinder = vertical_cylinder_container.getChildAt(1);
-      bottom_cylinder.x =  Math.round(vertical_cylinder_container.current_x);
-      vertical_cylinder_container.child_offset.bottom = build_point_param(bottom_cylinder.x,bottom_cylinder.y,bottom_cylinder.end_y);
+      //Remove old cylinder, prevent overheat cpu
+      if (cylinder_container.current_x < -cylinder_size.width ){
+        wrap_cylinder_container.removeChild(cylinder_container);
+        continue;
+      }
+      cylinder_container.current_x -= 1.5;
+      var top_cylinder = cylinder_container.getChildAt(0);
+      top_cylinder.x = Math.round(cylinder_container.current_x);
+      cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
 
-      if (! vertical_cylinder_container.bird_passed){
-        if ( flappy_bird.x - half_bird_width > vertical_cylinder_container.child_offset.top.top_right.x ){
-          vertical_cylinder_container.bird_passed = true;
+      var bottom_cylinder = cylinder_container.getChildAt(1);
+      bottom_cylinder.x =  Math.round(cylinder_container.current_x);
+      cylinder_container.child_offset.bottom = build_point_param(bottom_cylinder.x,bottom_cylinder.y,bottom_cylinder.end_y);
+
+      if (! cylinder_container.bird_passed){
+        if ( flappy_bird.x - half_bird_width > cylinder_container.child_offset.top.top_right.x ){
+          cylinder_container.bird_passed = true;
           //play passed sound
           createjs.Sound.play("point");
           score_text.value++;
           score_text.text = score_text.value;
         }
-        check_game_over(vertical_cylinder_container.child_offset);
+        if ((flappy_bird.x + half_bird_width ) > cylinder_container.child_offset.top.top_left.x 
+          && (flappy_bird.x - half_bird_width) < cylinder_container.child_offset.top.top_right.x ){
+          check_game_over(cylinder_container.child_offset);
+        }
+        
       }
     }
   }
 
   if (general_number_ticker % 100 == 0){
-    build_green_box();
+    build_green_cylinder();
   }
   
 
@@ -138,8 +144,6 @@ function ticker_flapply_playing (event) {
     var next_rotation = flappy_bird.rotation + 3;
     next_rotation = (next_rotation >= 90 ) ? 90:  next_rotation;
     flappy_bird.rotation = next_rotation;
-    /*createjs.Tween.get(flappy_bird).to({rotation:90,y:ground.y-10}, 600,createjs.Ease.sineIn ).call(function(){
-    });*/
   }
 
   if (flappy_bird.options.status == 'in_up'){
@@ -174,6 +178,7 @@ function ticker_flapply_playing (event) {
 }
 
 function check_game_over(child_offset){
+
   var edge_x = flappy_bird.x;
   var edge_y = flappy_bird.y;
   
@@ -206,13 +211,14 @@ function check_game_over(child_offset){
         createjs.Sound.play("hit");
         stage.addChild(flappy_bird);
         stage.options.stage = 'gameover';
+        stage.removeChild(score_text);
         createjs.Ticker.removeEventListener("tick", ticker_flapply_playing);
+        stage.addChild(flappy_bird);
         createjs.Tween.get(flappy_bird).to({y:edge_ground_y, rotation:90}, 500,createjs.Ease.sineIn ).call(function(){
           stage.addChild(ground);
           setTimeout(function(){
             show_gameOver_board();
           },500);
-          
         });
         
       }
@@ -221,11 +227,16 @@ function check_game_over(child_offset){
 }
 
 function show_gameOver_board(){
+
+  general_number_ticker = 0;
+  bird_number_ticker = 0;
   log("show game over board");
   createjs.Sound.play("swooshing");
   var gameOver_container = new createjs.Container();
   gameOver_container.name = "gameOver_container";
   stage.addChild(gameOver_container);
+  stage.addChild(flappy_bird);
+  stage.addChild(ground);
 
   //Init ready text
 
@@ -248,16 +259,32 @@ function show_gameOver_board(){
     gameOver_container.addChild(medal_board_bit);
     createjs.Tween.get(medal_board_bit).to({y:180}, 300,createjs.Ease.backInOut  ).call(function(){
 
-      current_score_text = new createjs.Text(score_text.value, "bold 20px Sanidana", "#fff");
-      current_score_text.value = 0;
+      current_score_text = new createjs.Text( score_text.value, "bold 20px Sanidana", "#fff");
       current_score_text.name = 'current_score_text';
+      
       current_score_text.x =  medal_board_bit.x + 205 - current_score_text.getMeasuredWidth();
       current_score_text.y =  215;
-      current_score_text.shadow = new createjs.Shadow("#000000", 0,0, 5);
       
+      log(score_text.value);
+      current_score_text.shadow = new createjs.Shadow("#000000", 0,0, 5);
       gameOver_container.addChild(current_score_text);
 
-      best_score_text = new createjs.Text(50, "bold 20px Sanidana", "#fff");
+
+      var best_score = get_best_score();
+      if (score_text.value > best_score){
+        set_best_score(score_text.value);
+        best_score = score_text.value;
+
+        var new_best_score_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
+        new_best_score_bit.sourceRect = new createjs.Rectangle(new_best_score_offset.x,new_best_score_offset.y,
+        new_best_score_size.width, new_best_score_size.height);
+        new_best_score_bit.x = medal_board_bit.x + 135;
+        new_best_score_bit.y = 240;
+        gameOver_container.addChild(new_best_score_bit);
+
+      }
+
+      best_score_text = new createjs.Text(best_score, "bold 20px Sanidana", "#fff");
       best_score_text.value = 0;
       best_score_text.name = 'best_score_text';
       best_score_text.x =  medal_board_bit.x + 205 - best_score_text.getMeasuredWidth()
@@ -266,10 +293,10 @@ function show_gameOver_board(){
       
       gameOver_container.addChild(best_score_text);
 
-      if (score_text.value > 10 || 1==1){
+      if (score_text.value > 10 ){
         var medal_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
         var selected_medal_offset = score_text.value > 20 ? platium_medal_offset : gold_medal_offset;
-        selected_medal_offset = platium_medal_offset;
+        
         medal_bit.sourceRect = new createjs.Rectangle(selected_medal_offset.x,selected_medal_offset.y,
         medal_size.width, medal_size.height);
         medal_bit.x = medal_board_bit.x + 27;
@@ -277,10 +304,30 @@ function show_gameOver_board(){
         
         gameOver_container.addChild(medal_bit);
       }
+
+      //Add play button
+      var play_button_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
       
-      
+      play_button_bit.sourceRect = new createjs.Rectangle(play_button_offset.x,play_button_offset.y,
+      play_button_size.width, play_button_size.height);
+      play_button_bit.x = Math.round((game_size.width - play_button_size.width)/2);
+      play_button_bit.y = medal_board_bit.y +150;
+
+      play_button_bit.addEventListener("click", function(){
+        stage.removeChild(stage.getChildByName('gameOver_container'));
+        stage.removeChild(stage.getChildByName('wrap_cylinder_container'));
+        stage.removeChild(stage.getChildByName('score_text'));
+        stage.removeChild(stage.getChildByName('ground'));
+        stage.removeChild(stage.getChildByName('house_bitmap'));
 
 
+        
+        ready_stage();
+      });
+      
+      gameOver_container.addChild(play_button_bit);
+      log("done play button");
+      
     });
   });
 }
