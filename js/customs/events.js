@@ -271,9 +271,16 @@ function show_gameOver_board(){
 
 
       var best_score = get_best_score();
-      if (score_text.value > best_score){
-        set_best_score(score_text.value);
+      log("best_score yeah");
+      log(best_score);
+      log(score_text.value);
+
+      if (score_text.value > best_score ){
+        
         best_score = score_text.value;
+        set_best_score(best_score);
+
+        log("show new score_text");
 
         var new_best_score_bit = new createjs.Bitmap(loader.getResult("main_sprite"));
         new_best_score_bit.sourceRect = new createjs.Rectangle(new_best_score_offset.x,new_best_score_offset.y,
