@@ -7,9 +7,9 @@ Resources
 ==
 I used sprite_sheet and sounds which are extracted from APK file.
 
-Same change with version on mobile :
+Some different with version on mobile :
 ==
 - Lack of global score ranking.
-- Different font number.
-- I tried to imporved FPS but not sure about smooth experience with mobile version.
-- It written by HTML5, Canvas library is power by [Easeljs](http://www.createjs.com/#!/EaselJS)
+- Display number,score.
+- I tried to imporved FPS but not sure about smooth experience with mobile version, will be updated in free time.
+- It written by HTML5, Canvas library is powered by [Easeljs](http://www.createjs.com/#!/EaselJS)
