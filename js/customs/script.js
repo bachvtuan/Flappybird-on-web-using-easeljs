@@ -39,7 +39,7 @@ function init () {
   stage.options = {stage:'init'};
   stage.enableMouseOver(20);  
   
-  createjs.Ticker.setInterval(10);
+  createjs.Ticker.setInterval(15);
   createjs.Ticker.addEventListener("tick", tick);
   
   var manifest = [
@@ -167,6 +167,7 @@ function ready_stage(){
 
   flappy_bird.x = tip_bit.x - 0;
   flappy_bird.y = tip_bit.y + 50;
+  flappy_bird.options.start_y = flappy_bird.y;
   flappy_bird.options.origin_y = flappy_bird.y;
 
   stage.addChild(flappy_bird);
@@ -246,8 +247,8 @@ function build_green_cylinder(){
 
 
   var bottom_cylinder = new createjs.Bitmap(loader.getResult("main_sprite"));
-  //The height of space between 2 cylinder = 105px
-  var start_bottom_cylinder_y = top_cylinder.end_y+ 105;
+  //The height of space between 2 cylinder = 115px
+  var start_bottom_cylinder_y = top_cylinder.end_y+ 115;
   bottom_cylinder.name = "bottom_cylinder";
   bottom_cylinder.sourceRect = new createjs.Rectangle(168,645,cylinder_size.width, cylinder_size.height);
   bottom_cylinder.x = vertical_cylinder_container.current_x;

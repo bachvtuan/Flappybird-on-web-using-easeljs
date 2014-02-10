@@ -32,6 +32,7 @@ function stage_playing_mouse_down (event) {
   next_y = (next_y >= 0) ? next_y: 0;
   flappy_bird.options.status = 'in_up';
   flappy_bird.options.next_y = next_y;
+  flappy_bird.options.start_y = flappy_bird.y;
   
 }
 
@@ -41,7 +42,7 @@ function tick(event) {
   general_number_ticker++;
 
   if (stage.getChildByName('ground') != null && stage_name !='gameover'){
-    ground.delay_x  +=0.2; 
+    ground.delay_x  +=0.25; 
     if (ground.delay_x ==1){
       ground.delay_x = 0;
     }
@@ -103,7 +104,7 @@ function ticker_flapply_playing (event) {
         wrap_cylinder_container.removeChild(cylinder_container);
         continue;
       }
-      cylinder_container.current_x -= 1.5;
+      cylinder_container.current_x -= 1;
       var top_cylinder = cylinder_container.getChildAt(0);
       top_cylinder.x = Math.round(cylinder_container.current_x);
       cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
@@ -129,32 +130,48 @@ function ticker_flapply_playing (event) {
     }
   }
 
-  if (general_number_ticker % 100 == 0){
+  if (general_number_ticker % 140 == 0){
     build_green_cylinder();
   }
   
 
   if (flappy_bird.options.status == 'rest' ){
     /*flappy_bird.options.status = 'is_down';*/
-    var next_y = flappy_bird.y + 3;
+    var param = ( flappy_bird.y - flappy_bird.options.start_y ) / ( edge_ground_y - flappy_bird.options.start_y );
+    param = param * 3.14/2;
+    log(edge_ground_y - flappy_bird.options.start_y );
+    log(flappy_bird.y);
+    log(edge_ground_y - flappy_bird.options.start_y);
+    log(param);
+    var increase = Math.round( 6 * Math.sin(param)  );
+    if (increase < 1)
+      increase = 1;
+    
+    var next_y = flappy_bird.y +  increase ;
     
     next_y = (next_y > edge_ground_y) ? edge_ground_y: next_y;
     flappy_bird.y = next_y;
 
-    var next_rotation = flappy_bird.rotation + 3;
+    var increase = Math.round( 6 * Math.sin(param)  );
+    if (increase < 1)
+      increase  = 1;
+    var next_rotation = flappy_bird.rotation + increase ;
     next_rotation = (next_rotation >= 90 ) ? 90:  next_rotation;
     flappy_bird.rotation = next_rotation;
   }
 
-  if (flappy_bird.options.status == 'in_up'){
-    flappy_bird.y -= 2;
+  if (flappy_bird.options.status == 'in_up' ){
+    var param =(flappy_bird.y - flappy_bird.options.start_y)/ ( flappy_bird.options.next_y - flappy_bird.options.start_y );
+    
+    flappy_bird.y -=  Math.round(3 * Math.cos(param));
     if (flappy_bird.y < flappy_bird.options.next_y){
       //when move up done
       flappy_bird.options.status = 'rest';
+      flappy_bird.options.start_y = flappy_bird.y - 1;
     }
     //Rotation bird to -20 degree
     if (flappy_bird.rotation > -20){
-      flappy_bird.rotation -= 15;
+      flappy_bird.rotation -= 10;
     }
   }
 
