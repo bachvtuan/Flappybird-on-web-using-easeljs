@@ -104,7 +104,7 @@ function ticker_flapply_playing (event) {
         wrap_cylinder_container.removeChild(cylinder_container);
         continue;
       }
-      cylinder_container.current_x -= 1;
+      cylinder_container.current_x -= 1.5;
       var top_cylinder = cylinder_container.getChildAt(0);
       top_cylinder.x = Math.round(cylinder_container.current_x);
       cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
@@ -130,10 +130,12 @@ function ticker_flapply_playing (event) {
     }
   }
 
-  if (general_number_ticker % 140 == 0){
+  if (general_number_ticker % 110 == 0){
     build_green_cylinder();
   }
   
+  console.log("x "+flappy_bird.x);
+  console.log("y " +flappy_bird.y);
 
   if (flappy_bird.options.status == 'rest' ){
     /*flappy_bird.options.status = 'is_down';*/
@@ -152,11 +154,12 @@ function ticker_flapply_playing (event) {
     next_y = (next_y > edge_ground_y) ? edge_ground_y: next_y;
     flappy_bird.y = next_y;
 
-    var increase = Math.round( 6 * Math.sin(param)  );
-    if (increase < 1)
-      increase  = 1;
     var next_rotation = flappy_bird.rotation + increase ;
+    
     next_rotation = (next_rotation >= 90 ) ? 90:  next_rotation;
+    if ( next_rotation - flappy_bird.rotation <= 3)
+      flappy_bird.rotation ++;
+    else
     flappy_bird.rotation = next_rotation;
   }
 
@@ -164,7 +167,8 @@ function ticker_flapply_playing (event) {
     var param =(flappy_bird.y - flappy_bird.options.start_y)/ ( flappy_bird.options.next_y - flappy_bird.options.start_y );
     
     flappy_bird.y -=  Math.round(3 * Math.cos(param));
-    if (flappy_bird.y < flappy_bird.options.next_y){
+    
+    if (flappy_bird.y <= flappy_bird.options.next_y){
       //when move up done
       flappy_bird.options.status = 'rest';
       flappy_bird.options.start_y = flappy_bird.y - 1;
