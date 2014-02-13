@@ -145,7 +145,7 @@ function ticker_flapply_playing (event) {
     log(flappy_bird.y);
     log(edge_ground_y - flappy_bird.options.start_y);
     log(param);
-    var increase = Math.round( 6 * Math.sin(param)  );
+    var increase = Math.round( 8 * Math.sin(param)  );
     if (increase < 1)
       increase = 1;
     

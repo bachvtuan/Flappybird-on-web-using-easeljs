@@ -37,7 +37,7 @@ function init () {
   
   stage = new createjs.Stage("game");
   stage.options = {stage:'init'};
-  stage.enableMouseOver(20);  
+  /*stage.enableMouseOver(20);  */
   
   createjs.Ticker.setInterval(15);
   createjs.Ticker.addEventListener("tick", tick);
