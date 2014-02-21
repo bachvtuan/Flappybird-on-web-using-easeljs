@@ -104,7 +104,7 @@ function ticker_flapply_playing (event) {
         wrap_cylinder_container.removeChild(cylinder_container);
         continue;
       }
-      cylinder_container.current_x -= 1.5;
+      cylinder_container.current_x -= 2;
       var top_cylinder = cylinder_container.getChildAt(0);
       top_cylinder.x = Math.round(cylinder_container.current_x);
       cylinder_container.child_offset.top = build_point_param(top_cylinder.x,0,top_cylinder.end_y);
@@ -130,7 +130,7 @@ function ticker_flapply_playing (event) {
     }
   }
 
-  if (general_number_ticker % 110 == 0){
+  if (general_number_ticker % 90 == 0){
     build_green_cylinder();
   }
   
